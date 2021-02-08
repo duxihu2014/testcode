@@ -2,7 +2,7 @@ package arithmetic.stack;
 
 import java.util.Stack;
 
-class Solution {
+class validParenthese {
     public boolean isValid(String s) {
         if (s == null || s.length() == 0) {
             return true;
