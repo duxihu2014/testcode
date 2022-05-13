@@ -15,13 +15,14 @@ public class Solution26 {
     }
 
     public int removeDuplicates(int[] nums) {
-        int current = 1;
+        int current = 0;
         int faster = 1;
-        int currentValue = nums[0];
+        //int currentValue = nums[0];
         for (int i = 1; i < nums.length; i++) {
-                if(currentValue!=nums[i]){
+                if(nums[current++]!=nums[i]){
                     nums[current++]=nums[i];
-                    currentValue =nums[i];
+                    //currentValue =nums[i];
+                  current++;
                 }
                     faster++;
 

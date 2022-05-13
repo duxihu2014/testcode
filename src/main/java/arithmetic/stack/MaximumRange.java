@@ -2,10 +2,10 @@ package arithmetic.stack;
 
 import java.util.Stack;
 
-class ByteDanceEx1 {
+public class MaximumRange {
 	public static void main(String[] args) {
 		int[] numbers = {5,2,3,4,1};
-		System.out.println(new ByteDanceEx1().getMax(numbers));
+		System.out.println(new MaximumRange().getMax(numbers));
 	}
 	public int getMax(int[] numbers) {
 		if (numbers == null || numbers.length == 0) {
