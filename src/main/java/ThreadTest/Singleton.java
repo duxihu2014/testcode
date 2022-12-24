@@ -2,25 +2,15 @@ package ThreadTest;
 
 public class Singleton {
 
-    private volatile static Singleton singleton;
 
-    private Singleton(){
-
+    private static class SingletonHolder{
+        private static final Singleton INSTANCE = new Singleton();
     }
 
-    public static Singleton getSingleton(){
-        if(singleton == null){
-            synchronized (Singleton.class){
-                if(singleton == null){
-                    singleton = new Singleton();
-                }
-            }
-        }
-        return singleton;
+    private Singleton(){}
+
+    public static final Singleton getInstance(){
+        return SingletonHolder.INSTANCE;
     }
 
-    public static void main(String[] args) {
-
-
-    }
 }

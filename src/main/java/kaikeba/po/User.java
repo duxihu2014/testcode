@@ -1,10 +1,10 @@
 package kaikeba.po;
 
-import lombok.Data;
+//import lombok.Data;
 
 import java.util.Date;
 
-@Data
+//@Data
 public class User {
 	private int id;
 	private String username;
