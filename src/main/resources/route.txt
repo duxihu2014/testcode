@@ -1,0 +1,281 @@
+[
+  {
+    path: '/login',    
+    name: 'login',
+    hidden: true,
+    meta: { title: 'Login - 登录' },
+    component: () => import('@/views/login/index.vue')
+  },
+  {
+    path: '/',
+    redirect: '/dashboard',
+    component: Main,
+    children: [
+      {
+        path: '/dashboard',
+        name: 'dashboard',
+        meta: { title: '首页', icon: 'el-icon-house', affix: true },
+        component: () => import('@/views/home/index.vue')
+      },
+      {
+        path: '/homepage',
+        name: 'homepage',
+        meta: { title: 'homepage' },
+        component: () => import('@/views/home/index.vue')
+      }]
+  },
+  {
+    path: '/station',
+    name: 'station',
+    component: Main,
+    meta: { title: 'Station', icon: 'el-icon-postcard' },
+    children: [
+      {
+        path: '/receiving',
+        name: 'receiving',
+        meta: { title: 'receiving' },
+        component: () => import('@/views/receiving/index.vue')
+      },
+      {
+        path: '/test',
+        name: 'test',
+        meta: { title: 'test' },
+        component: () => import('@/views/test/index.vue')
+      },
+      {
+        path: '/CreateWorkOrder',
+        name: 'createWorkorder',
+        meta: { title: 'createWorkorder' },
+        component: () => import('@/views/createWorkorder/index.vue')
+      },
+      {
+        path: '/loading',
+        name: 'loading',
+        meta: { title: 'loading' },
+        component: () => import('@/views/loading/index.vue')
+      },
+      {
+        path: '/vmi',
+        name: 'vmi',
+        meta: { title: 'vmi' },
+        component: () => import('@/views/vmi/index.vue')
+      },
+      {
+        path: '/vmi_ndi',
+        name: 'vmi_ndi',
+        meta: { title: 'vmi_ndi' },
+        component: () => import('@/views/vmi_ndi/index.vue')
+      },
+      {
+        path: '/test_retry',
+        name: 'test_retry',
+        meta: { title: 'test_retry' },
+        component: () => import('@/views/test_retry/index.vue')
+      },
+      {
+        path: '/shipping_fgi',
+        name: 'shipping_fgi',
+        meta: { title: 'Shipping FGI' },
+        component: () => import('@/views/shipping_fgi/index.vue')
+      },
+      {
+        path: '/hold',
+        name: 'hold',
+        meta: { title: 'Hold' },
+        component: () => import('@/views/hold/index.vue')
+      },
+      {
+        path: '/mrb',
+        name: 'mrb',
+        meta: { title: 'MRB' },
+        component: () => import('@/views/mrb/index.vue')
+      },
+      {
+        path: '/returnDGI',
+        name: 'returnDGI',
+        meta: { title: 'Return DGI' },
+        component: () => import('@/views/returnDGI/index.vue')
+      },
+      {
+        path: '/assy',
+        name: 'assy',
+        meta: { title: 'Assy' },
+        component: () => import('@/views/assy/index.vue')
+      },
+      {
+        path: '/print_label',
+        name: 'print_label',
+        meta: { title: 'print_label' },
+        component: () => import('@/views/print_label/index.vue')
+      },
+      {
+        path: '/fi',
+        name: 'fi',
+        meta: { title: 'FI' },
+        component: () => import('@/views/fi/index.vue')
+      },
+      {
+        path: '/obi',
+        name: 'obi',
+        meta: { title: 'OBI' },
+        component: () => import('@/views/obi/index.vue')
+      },
+      {
+        path: '/shipping',
+        name: 'shipping',
+        meta: { title: 'Shipping' },
+        component: () => import('@/views/shipping/index.vue')
+      },
+      {
+        path: '/repair_check_in',
+        name: 'repair_check_in',
+        meta: { title: 'Repair_check_in' },
+        component: () => import('@/views/repair_check_in/index.vue')
+      },
+      {
+        path: '/eco',
+        name: 'eco',
+        meta: { title: 'Eco' },
+        component: () => import('@/views/eco/index.vue')
+      },
+      {
+        path: '/debug',
+        name: 'debug',
+        meta: { title: 'Debug' },
+        component: () => import('@/views/debug/index.vue')
+      },
+      {
+        path: '/repair_component',
+        name: 'repair_component',
+        meta: { title: 'Repair Component' },
+        component: () => import('@/views/repair_component/index.vue')
+      },
+      {
+        path: '/ordercheck',
+        name: 'ordercheck',
+        meta: { title: 'Order Check' },
+        component: () => import('@/views/ordercheck/index.vue')
+      },
+      {
+        path: '/ship_order',
+        name: 'ship_order',
+        meta: { title: '出货订单' },
+        component: () => import('@/views/ship_order/index.vue')
+      },
+      {
+        path: '/ship_plan',
+        name: 'ship_plan',
+        meta: { title: '出货计划' },
+        component: () => import('@/views/ship_plan/index.vue')
+      },
+      {
+        path: '/attachment',
+        name: 'attachment',
+        meta: { title: '附件管理' },
+        component: () => import('@/views/attachment/index.vue')
+      },
+      {
+        path: '/config_index',
+        name: 'config_index',
+        meta: { title: '基础数据配置' },
+        component: () => import('@/views/config/index.vue')
+      },
+      {
+        path: '/config_ship',
+        name: 'config_ship',
+        meta: { title: 'Ship Manage' },
+        component: () => import('@/views/config/config_ship/index.vue')
+      },
+      {
+        path: '/config_actiontype',
+        name: 'config_actiontype',
+        meta: { title: 'ActionType Manage' },
+        component: () => import('@/views/config/config_actiontype/index.vue')
+      },
+      {
+        path: '/config_majordefect',
+        name: 'config_majordefect',
+        meta: { title: 'Majordefect Manage' },
+        component: () => import('@/views/config/config_majordefect/index.vue')
+      },
+      {
+        path: '/config_snheader',
+        name: 'config_snheader',
+        meta: { title: 'SNHeader Manage' },
+        component: () => import('@/views/config/config_snheader/index.vue')
+      },
+      {
+        path: '/config_snapreport',
+        name: 'config_snapreport',
+        meta: { title: 'SNAP Report' },
+        component: () => import('@/views/config/config_snapreport/index.vue')
+      },
+      {
+        path: '/config_label',
+        name: 'config_label',
+        meta: { title: 'Label Manage' },
+        component: () => import('@/views/config/config_label/index.vue')
+      },
+      {
+        path: '/config_pidmapper',
+        name: 'config_pidmapper',
+        meta: { title: 'PID Mapper Manage' },
+        component: () => import('@/views/config/config_pidmapper/index.vue')
+      },
+      {
+        path: '/config_snchangetool',
+        name: 'config_snchangetool',
+        meta: { title: 'SN Change Tool' },
+        component: () => import('@/views/config/config_snchangetool/index.vue')
+      },
+      {
+        path: '/config_snbase',
+        name: 'config_snbase',
+        meta: { title: 'SN Base Manage' },
+        component: () => import('@/views/config/config_snbase/index.vue')
+      },
+      
+      {
+        path: '/index_page',
+        name: 'index_page',
+        meta: { title: '系统主页' },
+        component: () => import('@/views/index_page/index.vue')
+      }
+      
+    ]
+  },
+  {
+    path: '/pack',
+    name: 'pack',
+    component: Main,
+    meta: { title: '包装', icon: 'el-icon-postcard' },
+    children: [
+      {
+        path: '/pack/single_pack',
+        name: 'single_pack',
+        meta: { title: 'Single Pack' },
+        component: () => import('@/views/pack/single_pack/index.vue')
+      },
+      {
+        path: '/pack/kitting',
+        name: 'kitting',
+        meta: { title: 'Kitting' },
+        component: () => import('@/views/pack/kitting/index.vue')
+      },
+      {
+        path: '/pack/over_pack',
+        name: 'over_pack',
+        meta: { title: 'Over Pack' },
+        component: () => import('@/views/pack/over_pack/index.vue')
+      },
+      {
+        path: '/pack/binding_order',
+        name: 'binding_order',
+        meta: { title: 'Binding Order' },
+        component: () => import('@/views/pack/binding_order/index.vue')
+      },
+
+      
+    ]
+  }
+]

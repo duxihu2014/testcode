@@ -1,0 +1,111 @@
+DOA分析报表
+我现在要实现：原物料用量分析的报表:DoaReportController（在com.foxconn.gsp.report.business.mes.controller目录生成controller）
+
+檢索項：	開始時間和結束時間（取出shipment_detail表的last_modified_date，
+開始時間的示例值为2026-06，結束時間的示例值为2026-07，需要帮我转化为開始時間2026-06-00 00:00:00,結束時間2026-07-31 23:59:59 ），
+品牌(List<String>类型，取shipment表的brand_code)，和tenantId(页面传入)
+
+返回欄位:
+1.出貨月份：	last_modified_date对应的月份
+2.出貨數量	：last_modified_date对应的月份的记录值
+3.Total	： 第5欄位到第14栏位的和
+4.Rate%	：  Total/出貨數量
+5.加電無顯:  last_modified_date对应的月份的ore.DOA_REASON='加電無顯'的统计值
+6.不加電	：last_modified_date对应的月份的ore.DOA_REASON='不加電'的统计值
+7.亮線	：last_modified_date对应的月份的ore.DOA_REASON='亮線'的统计值
+8.暗影區/偏暗/偏色	 ：last_modified_date对应的月份的ore.DOA_REASON='暗影區/偏暗/偏色'的统计值
+9.間歇性不良	 ：last_modified_date对应的月份的ore.DOA_REASON='間歇性不良'的统计值
+10.闪屏	     ：last_modified_date对应的月份的ore.DOA_REASON='闪屏'的统计值
+11.按鍵不良	   ：last_modified_date对应的月份的ore.DOA_REASON='按鍵不良'的统计值
+12.花屏	       ：last_modified_date对应的月份的ore.DOA_REASON='花屏'的统计值
+13.接口不良	    ：last_modified_date对应的月份的ore.DOA_REASON='接口不良'的统计值
+14.其它          ：last_modified_date对应的月份的ore.DOA_REASON 不是第5栏位到13栏位的统计值
+
+实现逻辑：参考下面的sql计算出明细，再通过last_modified_date计算当前搜索年的月份的统计值
+select sd.last_modified_date ,ship.brand_code ,sd.ppid,  ore.PART_USE_STATUS,  ore.DOA_REASON, sd.*,ore.* from 
+shipment_detail sd  
+inner join ods_rejects_extend ore on sd.source_id = ore.REJECTS_ID 
+inner join shipment ship on ship.id = sd.shipment_id  
+where ore.PART_USE_STATUS='DOA'
+
+显示数据效果如下：
+Ship date	出貨數量	Total	Rate%	加電無顯	不加電	亮線	  暗影區/偏暗/偏色	   間歇性不良	闪屏	按鍵不良	花屏	接口不良	其它
+1月	        1818	47	    2.59%	6	    11	    4	    4	   	        6   3	    4	  3	     3	  3    
+
+最后再加一行统计信息
+Total總計	6129	177	   2.89%	37	    30	  23	  15	      12	11	11	10	10	18
+  
+
+帮我写一个更新sql的语句
+通过下面的语句查到500多条数据
+select id,DOA_REASON,*  from ods_rejects_extend ore where ore.PART_USE_STATUS='DOA';
+我现在想要对这批数据做DOA_REASON字段值的更新，更新内容为
+加電無顯，	不加電，	亮線，	  暗影區/偏暗/偏色，	   間歇性不良，	闪屏，	按鍵不良，	花屏，	接口不良，	其它
+其中之一。我想在这500多条数数据，每50条更新一种类型，比如前50条DOA_REASON字段值的更新为加電無顯
+
+
+
+
+请参照
+com.foxconn.gsp.report.business.mes.pojo.vo.TestFailDistributionVO  的@ExcelProperty写法
+实现
+com.foxconn.gsp.report.business.mes.pojo.vo.DoaReportDataVO
+@ExcelProperty的国际化，并帮我在properties文件中生成相应的配置
+message.properties
+message_en_US.properties
+message_zh_CN.properties
+message_zh_TW.propertie
+
+
+
+# DOA Report
+DOA_REPORT_SHIP_MONTH=出货月份
+DOA_REPORT_SHIP_QTY=出货数量
+DOA_REPORT_TOTAL_DOA=DOA总数
+DOA_REPORT_RATE=不良率%
+DOA_REPORT_NO_DISPLAY=加电无显
+DOA_REPORT_NO_POWER=不加电
+DOA_REPORT_BRIGHT_LINE=亮线
+DOA_REPORT_DARK_SHADOW=暗影区/偏暗/偏色
+DOA_REPORT_INTERMITTENT=间歇性不良
+DOA_REPORT_FLICKER=闪屏
+DOA_REPORT_KEY_FAIL=按键不良
+DOA_REPORT_GARBLED_SCREEN=花屏
+DOA_REPORT_PORT_FAIL=接口不良
+DOA_REPORT_OTHER=其它
+
+
+# DOA Report
+DOA_REPORT_SHIP_MONTH=出貨月份
+DOA_REPORT_SHIP_QTY=出貨數量
+DOA_REPORT_TOTAL_DOA=DOA總數
+DOA_REPORT_RATE=不良率%
+DOA_REPORT_NO_DISPLAY=加電無顯
+DOA_REPORT_NO_POWER=不加電
+DOA_REPORT_BRIGHT_LINE=亮線
+DOA_REPORT_DARK_SHADOW=暗影區/偏暗/偏色
+DOA_REPORT_INTERMITTENT=間歇性不良
+DOA_REPORT_FLICKER=闪屏
+DOA_REPORT_KEY_FAIL=按鍵不良
+DOA_REPORT_GARBLED_SCREEN=花屏
+DOA_REPORT_PORT_FAIL=接口不良
+DOA_REPORT_OTHER=其它
+
+
+
+# DOA Report
+DOA_REPORT_SHIP_MONTH=Ship Month
+DOA_REPORT_SHIP_QTY=Ship Qty
+DOA_REPORT_TOTAL_DOA=Total DOA
+DOA_REPORT_RATE=Rate%
+DOA_REPORT_NO_DISPLAY=No Display
+DOA_REPORT_NO_POWER=No Power
+DOA_REPORT_BRIGHT_LINE=Bright Line
+DOA_REPORT_DARK_SHADOW=Dark Shadow/Color Cast
+DOA_REPORT_INTERMITTENT=Intermittent
+DOA_REPORT_FLICKER=Flicker
+DOA_REPORT_KEY_FAIL=Key Fail
+DOA_REPORT_GARBLED_SCREEN=Garbled Screen
+DOA_REPORT_PORT_FAIL=Port Fail
+DOA_REPORT_OTHER=Other
+

@@ -1,0 +1,80 @@
+
+
+菜单配置
+http://10.113.20.218:1920/apis/oauth/service/menuList?companyId=27&appKeys=5rXC92hZpf69kUHRk44KNi6U&isMm=true
+
+按照：
+D:\project_code\oms_backend\src\main\java\com\foxconn\dbg\dp\prj\gssd\oms\business\onhold\controller
+下面的DimOnHoldRuleController.java类的mesExcelUtils类的逻辑，导出下载模板
+    @PostMapping("/downloadTemplate")
+    @ApiOperation(value = "下载导入模板")
+    public void downloadDetailRejectsByRma(HttpServletResponse response) throws IOException {
+        dimOnHoldRuleService.downloadTemplate(response);
+    }
+	   @Override
+    public void downloadTemplate(HttpServletResponse response) throws IOException {
+        String sheetName = I18nUtil.getMessage("ON_HOLD_RULE_TEMPLATE_SHEET_NAME");
+        mesExcelUtils.exportTemplate(DimOnHoldRuleImportDTO.class, sheetName, response);
+    }
+
+来修改mes_cisco_backend项目下面的
+D:\project_code\mes_cisco_backend\src\main\java\com\svrma\cisco\controller
+下面ShipOrderController类的下载模板方法，
+    @ApiOperation("下载模板")
+    @Override
+    public ResponseEntity<?> downloadExcelTemplate() throws IOException {
+        String templateFileName = "shiporder_template";
+        String filePath = "excel-template/" + templateFileName + ".xlsx";
+        ClassPathResource classPathResource = new ClassPathResource(filePath);
+        InputStream inputStream = classPathResource.getInputStream();
+        InputStreamResource resource =
+                new InputStreamResource(inputStream);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Cache-Control", "no-cache,no-store,must-revalidate");
+        headers.add("Pragma", "no-cache");
+        headers.add("Expires", "0");
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename="+templateFileName+".xlsx");
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .<Object>body(resource);
+    }
+
+我的目标是使用oms_backend项目的DimOnHoldRuleController.java类的mesExcelUtils类的逻辑，把相关的代码都迁移到mes_cisco_backend项目里，
+替换mes_cisco_backend项目里下面的Controller类用到的下载模板逻辑
+
+
+
+提示词2：
+RSnapController  exportDat
+PIDMappingController  exportExcel()
+
+
+按照ShipOrderController的downloadExcelTemplate(下载模板)
+和downloadShipOrderList(導出excel數據)的国际化写法。
+修改
+1.CsCActiontypeController  downloadExcelTemplate()
+2.CsCMajordefectController  downloadExcelTemplate()
+3.CsCPidLabelController  downloadPidLabel()和downloadExcelTemplate()
+4.CsCSnHeaderController  downloadExcelTemplate()
+5.LoadingController   downloadExcelTemplate()
+6.OrderAbnormityController  downExcelTemplate()
+7.PIDMappingController  downloadExcelTemplate()
+8.ShipConfigController  downExcelTemplate
+9.ShippingDgiController  downloadExcelTemplate
+10.ShipPlanController  downloadCreateDnTemplate 和 downloadShipPlanDetail
+11.SNBaseChangeController  downloadExcelTemplate
+12.SNChangeToolController downloadExcelTemplate
+并帮我在message.properties,message_en_US.properties,message_zh_CN.properties,message_zh_TW.propertie文件中生成相应的配置
+
+
+
+3.提示词：
+请参照
+com.foxconn.gsp.report.business.mes.pojo.vo.TestFailDistributionVO  的@ExcelProperty写法
+实现
+com.foxconn.gsp.report.business.mes.pojo.dto.ScrapDetailDTO
+和com.foxconn.gsp.report.business.mes.pojo.dto.RepairTestDTO
+@ExcelProperty的国际化，并帮我在message.properties,message_en_US.properties,message_zh_CN.properties,message_zh_TW.propertie文件中生成相应的配置
+

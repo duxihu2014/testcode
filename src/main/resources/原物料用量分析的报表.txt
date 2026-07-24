@@ -1,0 +1,62 @@
+我现在要实现：原物料用量分析的报表:PnUsageReportController（在com.foxconn.gsp.report.business.mes.controller目录生成controller）
+参考：TestFailDistributionReportController  测试不良分布报表
+
+
+
+
+提示语1：
+檢索項：	開始時間和結束時間（取出repair_detail_record表的CREATE_TIME），PN(取repair_detail表的PART_NO) ，	
+品牌(List<String>类型，取repair_detail表的brand)，和tenantId(页面传入)	
+返回欄位（分页展示）：序列号，	品牌，	PN，	PN維修數量，	機型，	原物料供应商，	原物料名稱，	原物料料號，	原物料數量，	比率
+欄位說明：
+1.序列号：系統自動生成
+2.品牌：repair_detail.BRAND
+3.PN：repair_detail.PART_NO
+4.PN維修數量：
+5.機型：prod_master.SKU_NO
+6.原物料供应商:prod_master.VENDOR_CODE
+7.原物料名稱:
+8.原物料料號:
+9.原物料數量:
+9.比率:原物料數量/PN維修數量(以%显示)
+
+下面sql计算出：品牌，PN，機型，原物料供应商
+select rd.brand,rd.PART_NO,pm.SKU_NO,pm.VENDOR_CODE from repair_detail rd 
+left join [gssd-gsp_official_web].dbo.prod_master pm     on pm.PART_NO = rd.PART_NO 
+group by 
+rd.brand,rd.PART_NO,pm.SKU_NO,pm.VENDOR_CODE
+order by rd.brand,rd.PART_NO
+
+遍历上一步的brand和PART_NO，拿到 PN維修數量（为原物料數量之和），原物料名稱，原物料料號，原物料數量和比率
+select rdr.NEW_PN  ,rdr.NEW_PN_NAME ,count(rdr.NEW_PN) from repair_detail_record rdr 
+where rdr.DETAIL_ID in (
+select rd.id  from repair_detail rd 
+where rd.brand = 'DELL' and rd.PART_NO = 'HMF7C'
+)
+and  rdr.NEW_PN is not null and rdr.NEW_PN_NAME is not null
+group by rdr.NEW_PN  ,rdr.NEW_PN_NAME
+
+
+提示语2：
+请参照
+com.foxconn.gsp.report.business.mes.pojo.vo.TestFailDistributionVO  的@ExcelProperty写法
+实现
+com.foxconn.gsp.report.business.mes.pojo.vo.PnUsageReportVO
+@ExcelProperty的国际化，并帮我在properties文件中生成相应的配置
+message.properties
+message_en_US.properties
+message_zh_CN.properties
+message_zh_TW.propertie
+
+
+					
+欄位數據來源：	系統自動生成	repair_detail-維修品主表.BRAND	repair_detail-維修品主表.PART_NO	表repair_detail_record計算欄位(依PN加總維修數量)	prod_master_產品管理主表. SKU_NO（幾種）	"
+表prod_master.VENDOR_CODE"	repair_detail_record-待修品維修記錄.NEW_PN_NAME	表repair_detail_record.NEW_PN	表repair_detail_record.QTY	計算欄位(原物料數量 / PN維修數量)	
+
+欄位說明：序列號	維修主表取值	成品料號	料號維修數量	整機L10機型 ，model	根據料號帶出原物料供應商信息	基於維修報告中更換零件名稱	基於維修報告中更換 零件的 PN	以料號及對應的SN加總計算總共 更換了多少個零件， 每台主機更換多個零件需進行累加	公式：原物料數量/ PN維修數量	I列/D列
+
+欄位：	序列号	品牌	PN	PN維修數量	機型	原物料供应商	原物料名稱	原物料料號	原物料數量	比率	
+
+
+
+

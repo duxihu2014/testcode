@@ -1,0 +1,14 @@
+帮我生成sql语句：
+读取route.txt文件，遇到文件中如下的结构
+{
+    path: '/login',    
+    name: 'login',
+    hidden: true,
+    meta: { title: 'Login - 登录' },
+    component: () => import('@/views/login/index.vue')
+  }
+生成如下的sql:生成的规则如下：（menu_id为每遇到一行加在现在值上面加1，menu_name为name字段的值，menu_code为cisco_和name字段的值，order_num为每遇到一行加在现在值上面加1，url为path字段的值）
+INSERT INTO alps_system_dev.sys_menu
+(menu_id, menu_name, menu_code, app_id, api_id, component, parent_id, order_num, url, menu_type, station_flag, icon, create_by, create_time, update_by, update_time, scheme, target, service_id, status, is_frame, company_id)
+VALUES(20291, 'login', 'cisco_login', 76, NULL, NULL, 0, 4, '/login', 'M', NULL, '#', 'C0105759', '2026-07-21 10:17:15', '', NULL, 'HTTP', NULL, NULL, 1, NULL, 27);
+

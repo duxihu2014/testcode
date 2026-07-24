@@ -1,0 +1,187 @@
+按維修故障分析報表-提示语进行修改代码
+我现在要实现：維修故障分析報表分析的报表:RepairFailureReportController（在com.foxconn.gsp.report.business.mes.controller目录生成controller）
+
+檢索項：	開始時間和結束時間（取出repair_detail_record表的CREATE_TIME，
+開始時間的示例值为2026-06，結束時間的示例值为2026-07，需要帮我转化为開始時間2026-06-00 00:00:00,結束時間2026-07-31 23:59:59 ），
+品牌(List<String>类型，取shipment表的brand_code)，和tenantId(页面传入)
+
+返回欄位：尺寸,	機種,	數量,	比率,	工程師確認故障描述,	維修及更換部件,	合計,	比率
+欄位說明：
+1.尺寸：pm.PARTS_LENGTH
+2.機種：pm.SKU_NO
+3.數量：通过程序逻辑计算出来
+4.比率：通过程序逻辑计算出来
+5.工程師確認故障描述：rdr.ROOT_CAUSE
+6.維修及更換部件:pm2.PRODUCT_TYPE
+7.合計:通过程序逻辑计算出来
+8.比率:通过程序逻辑计算出来
+
+通过下面的sql获得尺寸，機種，工程師確認故障描述，維修及更換部件，这个sql不做统计计算
+
+select pm.PARTS_LENGTH ,pm.SKU_NO ,rdr.ROOT_CAUSE,pm2.PRODUCT_TYPE  from [gssd-gsp_mes].dbo.repair_detail_record rdr
+left join [gssd-gsp_mes].dbo.repair_detail rd   on rd.ID =rdr.DETAIL_ID 
+LEFT JOIN (
+    SELECT *, 
+           ROW_NUMBER() OVER (PARTITION BY PART_NO ORDER BY (SELECT NULL)) as rn
+    FROM [gssd-gsp_official_web].dbo.prod_master
+) pm2
+on rdr.ORG_PN =   pm2.PART_NO  AND pm2.rn = 1
+LEFT JOIN (
+    SELECT *, 
+           ROW_NUMBER() OVER (PARTITION BY PART_NO ORDER BY (SELECT NULL)) as rn
+    FROM [gssd-gsp_official_web].dbo.prod_master
+) pm 
+on rd.PART_NO =   pm.PART_NO AND pm.rn = 1
+where pm.SKU_NO is not null and rdr.ORG_PN is not null and pm2.PRODUCT_TYPE is not null
+and pm.PARTS_LENGTH =21
+--order by pm.PARTS_LENGTH
+;
+
+
+
+第3.數量,4.比率,7.合計,8.比率 欄位通过程序计算出来。要求每行数据都要计算。
+
+对于获得的数据列表示例如下：
+17	D13.5-ROTA2				花屏/屏劃傷	計算機-電腦主板零件
+17	D13-SFF-VENICE-LOW		間歇性花屏	計算機-電腦主板零件
+21	D12-SFF-KYOTO-P			屏有亮線	計算機-電腦主板零件
+21	D13.5-SFF-VENICE-LOW-MLK	屏有白斑	計算機-電腦主板零件
+21	D13.5-SFF-VENICE-LOW-MLK	屏有白斑	計算機-電腦主板零件
+21	D12-SFF-KYOTO-P				屏有白斑	計算機-電腦主板零件
+21	AKALI	NTF	計算機-電腦主板
+21	FROST	NTF	計算機-電腦主板零件
+
+欄位计算规则說明
+3.數量：按尺寸和機種分组，分组里面有2条记录就计算为2，按尺寸和機種分组的每行數量都为2
+4.比率： 每行的數量数/sql记录数
+7.合計: 按尺寸和機種分组后，再按工程師確認故障描述和維修及更換部件分组，按工程師確認故障描述和維修及更換部件分组计算为2，则合計为2
+8.比率: 每行的合計数/每行的數量
+
+最后返回给前端的栏位为下面内容
+尺寸,	機種,	數量,	比率,	工程師確認故障描述,	維修及更換部件,	合計,	比率
+17	D13.5-ROTA2	  1		1/sql记录总数据	花屏/屏劃傷	計算機-電腦主板零件   1     合計/數量=100%
+17	D13-SFF-VENICE-LOW 1	1/sql记录总数据	間歇性花屏	計算機-電腦主板零件   1       合計/數量=100%
+21	D12-SFF-KYOTO-P		2	2/sql记录总数据  屏有亮線	計算機-電腦主板零件        1      合計/數量=100%
+21	D13.5-SFF-VENICE-LOW-MLK	2	2/sql记录总数据 屏有白斑	計算機-電腦主板零件   2     合計/數量=100%
+21	D13.5-SFF-VENICE-LOW-MLK	2	2/sql记录总数据 屏有白斑	計算機-電腦主板零件    2     合計/數量=100%
+21	D12-SFF-KYOTO-P				2	2/sql记录总数据 屏有白斑	計算機-電腦主板零件     1     合計/數量=100%
+21	AKALI	1	1/sql记录总数据 NTF	計算機-電腦主板       1     合計/數量=100%
+21	FROST	1	1/sql记录总数据 NTF	計算機-電腦主板零件    1     合計/數量=100%
+
+
+提示语2：
+现在我要实现：工程師確認故障描述排序的功能，在RepairFailureReportController中增加一个新方法，
+输入参数与getRepairFailureReport方法一致
+返回欄位：（List）工程師確認故障描述,	合計,	比率
+欄位說明：
+1.工程師確認故障描述
+2.合計
+3.比率
+方法实现逻辑：
+使用方法的getRepairFailureReport
+List<RepairFailureBaseData> baseData = repairFailureReportMapper.getBaseFailureData(query);
+拿到baseData后，对failureDescription进行分组，
+
+欄位：
+1.工程師確認故障描述： 为分组failureDescription
+2.合計：    分组的个数
+3.比率：    分组的个数/baseData.size()
+
+
+提示语3：
+现在我需要对RepairFailureReportController里的两个方法的入参：RepairFailureReportQueryDto进行调整
+前端不需要传递startTime和endTime
+增加 1.type:日期类型(int类型，1为年，2为年月，3为年周)
+2.year:年(格式为2026)
+3.yearMonth:年月(格式为2026-06)
+4.yearWeak:年周(格式为2026-34)
+如果type=1,year=2026,需要设置为startTime为2026-01-01 00:00:00,  endTime为2026-12-31 23:59:59
+如果type=2,yearMonth=2026-06,需要设置为startTime为2026-06-01 00:00:00,  endTime为2026-06-30 23:59:59
+如果type=3,yearWeak=2026-34,需要设置为startTime为2026年34周的开始时间,  endTime为2026年34周的结束时间
+
+提示语4：
+针对RepairFailureReportController的getStatsByFailureDescription方法，入参RepairFailureReportQueryDto增加一个参数
+valueRange(值为all,top5)，如果值为all,取statsList所有数据，如果值为top5,取statsList前5条数据，statsList需要按rate从高到低进行排序
+
+提示语5：
+我现在需要修改RepairFailureReportServiceImpl类的export方法
+这行代码        List<RepairFailureReportVO> baseData = this.getRepairFailureReport(query);
+产生的baseData数据在导出的excel里面，上下行相同的数据的需要做单元格合并，帮我实现这个功能修改，
+合并的列为dimension,model,failureDescription
+
+
+
+提示语6：
+请参照
+com.foxconn.gsp.report.business.mes.pojo.vo.TestFailDistributionVO  的@ExcelProperty写法
+实现
+com.foxconn.gsp.report.business.mes.pojo.vo.RepairFailureReportVO
+@ExcelProperty的国际化，并帮我在properties文件中生成相应的配置
+message.properties
+message_en_US.properties
+message_zh_CN.properties
+message_zh_TW.propertie
+
+根据com.foxconn.gsp.report.business.mes.pojo.vo.RepairFailureReportVO中@ExcelProperty的国际化的配置
+帮我在message.properties文件和message_en_US.properties文件和message_zh_CN.properties文件和message_zh_TW.propertie文件
+中生成相应的配置
+
+1.输入参数说明：
+1.type:日期类型(int类型，1为年，2为年月，3为年周)
+2.year:年(格式为2026)
+3.yearMonth:年月(格式为2026-06)
+4.yearWeak:年周(格式为2026-34)
+如果type=1,year=2026,需要设置为startTime为2026-01-01 00:00:00,  endTime为2026-12-31 23:59:59
+如果type=2,yearMonth=2026-06,需要设置为startTime为2026-06-01 00:00:00,  endTime为2026-06-30 23:59:59
+如果type=3,yearWeak=2026-34,需要设置为startTime为2026年34周的开始时间,  endTime为2026年34周的结束时间
+
+
+
+2.
+總計 (Total)	21
+
+3.
+# Repair Failure Report
+REPAIR_FAILURE_DIMENSION=尺寸
+REPAIR_FAILURE_MODEL=機種
+REPAIR_FAILURE_QUANTITY=數量
+REPAIR_FAILURE_RATE=比率
+REPAIR_FAILURE_FAILURE_DESCRIPTION=工程師確認故障描述
+REPAIR_FAILURE_REPLACED_COMPONENT=維修及更換部件
+REPAIR_FAILURE_TOTAL=合計
+REPAIR_FAILURE_SUB_RATE=比率
+
+# Repair Failure Report
+REPAIR_FAILURE_DIMENSION=尺寸
+REPAIR_FAILURE_MODEL=机型
+REPAIR_FAILURE_QUANTITY=数量
+REPAIR_FAILURE_RATE=比率
+REPAIR_FAILURE_FAILURE_DESCRIPTION=工程师确认故障描述
+REPAIR_FAILURE_REPLACED_COMPONENT=维修及更换部件
+REPAIR_FAILURE_TOTAL=合计
+REPAIR_FAILURE_SUB_RATE=比率
+
+# Repair Failure Report
+REPAIR_FAILURE_DIMENSION=Dimension
+REPAIR_FAILURE_MODEL=Model
+REPAIR_FAILURE_QUANTITY=Quantity
+REPAIR_FAILURE_RATE=Rate
+REPAIR_FAILURE_FAILURE_DESCRIPTION=Engineer Confirmed Failure Description
+REPAIR_FAILURE_REPLACED_COMPONENT=Repaired & Replaced Components
+REPAIR_FAILURE_TOTAL=Total
+REPAIR_FAILURE_SUB_RATE=Sub-rate
+
+
+
+    @GetMapping("/export")
+    @ApiOperation(value = "查詢維修故障分析報表報表导出")
+    public void export( HttpServletResponse response) throws IOException {
+        RepairFailureReportQueryDto query = new RepairFailureReportQueryDto();
+        query.setType(1);
+        query.setYear("2026");
+        repairFailureReportService.exportRepairFailureReport(query, response);
+    }
+
+
+
+prod_master:flag=1

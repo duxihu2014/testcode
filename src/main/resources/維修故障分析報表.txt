@@ -1,0 +1,112 @@
+问题汇总：
+增加
+
+partsType:尺寸类型,1-尺寸，2英寸  
+如果选择：1-尺寸，文本框：输入的是长(partsLength)*宽*高
+如果选择：2-英寸，文本框：输入的是长(partsLength)
+market:市場：market
+
+
+
+1.表格合并：前端展示
+2.搜索条件：周查询???
+
+4.有无分页
+5.每一種故障的數量/總數量
+
+
+維修故障分析報表
+http://10.113.20.218:1920/apis/portal/api/v1/prodMaster/save
+
+{"createBy":"ipsuser7","updateBy":"ipsuser7","brand":"HP","snPnToDigit":1,"flag":1,"npi":"N","tenantId":23,
+"macMultipleFlag":"N","imgPaths":"","partNo":"aa","productType":"計算機-個人電腦整機","productTypeEn":"Computer-PC",
+"partRev":"ss","skuNo":"ss","productionLevel":"L10",
+"snPnCode":"s","partsLength":0,"partsWidth":0,"partsHeight":0}
+
+
+
+{"createBy":"ipsuser7","updateBy":"ipsuser7","brand":"HP","snPnToDigit":1,"flag":1,"npi":"N","tenantId":23,
+"macMultipleFlag":"N","partNo":"bb","productType":"計算機-電腦主板","productTypeEn":"Computer-MB","snPnCode":"aaa",
+"productionLevel":"L10",
+"imgPaths":"","skuNo":"aaa","partsLength":9,"partsWidth":6,"partsHeight":3}
+
+
+
+{"createBy":"ipsuser7","updateBy":"ipsuser7","brand":"HP","snPnToDigit":1,"flag":1,"npi":"N",
+"tenantId":23,"macMultipleFlag":"N","partNo":"azxs","skuNo":"aszx","productType":"計算機-電腦主板",
+"productTypeEn":"Computer-MB","netWeight":"134","productionLevel":"L10","snPnCode":"dsa","imgPaths":"",
+"partsLength":9,"partsWidth":3,"partsHeight":6}
+
+
+
+
+通过
+select count(*) from [gssd-gsp_official_web].dbo.prod_master pm where PART_TYPE =1;
+查到1106条数据，现在我需要把这1106条数据平均在pm.PARTS_LENGTH字段设置值为
+17，19，20，21，22，23，24，27
+比如：设置前200条数据pm.PARTS_LENGTH=17
+我应该怎么写这个sql
+
+我使用第一个sql：
+select count(rdr.id)   from [gssd-gsp_mes].dbo.repair_detail_record rdr
+left join [gssd-gsp_mes].dbo.repair_detail rd   on rd.ID =rdr.DETAIL_ID 
+获得的数量为73853
+
+我使用第二个sql：
+select count(rdr.id)   from [gssd-gsp_mes].dbo.repair_detail_record rdr
+left join [gssd-gsp_mes].dbo.repair_detail rd   on rd.ID =rdr.DETAIL_ID 
+left join [gssd-gsp_official_web].dbo.prod_master pm2 on rdr.ORG_PN =   pm2.PART_NO 
+获得的数量为73870
+
+为什么第二个sql会比第一个sql的数据多，我想要第二个sql也返回73853条数据改怎么写
+
+
+通过这个sql我得到149条数据
+select * from  [gssd-gsp_mes].dbo.repair_detail_record rdr where rdr.id in (
+select rdr.id from [gssd-gsp_mes].dbo.repair_detail_record rdr
+left join [gssd-gsp_mes].dbo.repair_detail rd   on rd.ID =rdr.DETAIL_ID 
+LEFT JOIN (
+    SELECT *, 
+           ROW_NUMBER() OVER (PARTITION BY PART_NO ORDER BY (SELECT NULL)) as rn
+    FROM [gssd-gsp_official_web].dbo.prod_master
+) pm2
+on rdr.ORG_PN =   pm2.PART_NO  AND pm2.rn = 1
+LEFT JOIN (
+    SELECT *, 
+           ROW_NUMBER() OVER (PARTITION BY PART_NO ORDER BY (SELECT NULL)) as rn
+    FROM [gssd-gsp_official_web].dbo.prod_master
+) pm 
+on rd.PART_NO =   pm.PART_NO AND pm.rn = 1
+where pm.SKU_NO is not null and rdr.ORG_PN is not null and pm2.PRODUCT_TYPE is not null
+;
+)
+
+现在我希望更新repair_detail_record表ROOT_CAUSE的值为下面的值，用149条数据平均更新
+NTF
+SECN01換屏
+不加電
+內屏碎
+外觀不良
+白屏
+有水波紋
+百福寄錯機器原機返還
+花屏
+花屏/屏劃傷
+屏有白斑
+屏有亮線
+屏有黑斑
+屏有黑點
+屏有暗影區
+屏劃傷
+按鍵失靈
+按鍵脫落
+閃屏
+偏色
+虛擬發貨
+開機閃屏
+開機無顯
+開機黑屏
+間歇性花屏
+電源鍵鎖鍵
+顯示偏暗
+
